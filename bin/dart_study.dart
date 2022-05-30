@@ -1,46 +1,58 @@
 import 'package:dart_study/dart_study.dart' as dart_study;
 import 'package:dart_study/exceptions.dart';
+import 'package:dart_study/future_asyncro.dart';
+import 'dart:async';
+import 'dart:io';
 
-void main(List<String> arguments) {
-  //распространенный пример Исключений и их обработка
-  //в данном случае деление на ноль
+Future<int> sum(int a, int b) {
+  return Future.sync(() => a + b);
+}
 
-  // в dart для целочисленного деления используется int operator ~/
-  // "double operator / " -  а результат деления от оператора / будет с десятичным остатком
-  // try {
-  //   int x = 9;
-  //   int y = 0;
-  //   int z = x ~/ y; // 4
+Future<void> example() async {
+  final a = await sum(1, 4);
+  print(a);
+  final b = await sum(a, 9);
+  print(b);
+  final c = await sum(a, b);
+  print(c);
+}
 
-  //   //var z = x / y; //4,5 при делении на ноль - Infinity
-  //   // переменная z является double
+void main(List<String> arguments) async {
+  // первый вариант с помощью then
+  /*
+  Работать с Future через обработчики then и catchError — не самая хорошая идея, 
+  особенно если нужно передать результат одного Future во второй, 
+  а второго в третий и т. д., порождая callback hell.
+  https://habr.com/ru/company/surfstudio/blog/539362/
+   */
+  //final a = sum(1, 4);
+  // a.then((a) {
+  //   print(a);
+  //   final b = sum(a, 9);
+  //   b.then((b) {
+  //     print(b);
+  //     final c = sum(a, b);
+  //     c.then((value) => print(value));
+  //   });
+  // });
 
-  //   print(z);
-  // } on IntegerDivisionByZeroException catch (e, s) {
-  //   print("Обработка исключения $e");
-  //   print("Стек $s");
-  // }
-  // print("Завершение программы");
+//второй вариант с помощью async/await
+/*
+при таком подходе мы теряем обработчик catchError, 
+однако никто не мешает нам обрабатывать ошибки через стандартный try/catch.
+https://habr.com/ru/company/surfstudio/blog/539362/ 
+*/
+//final a = await sum(1, 4);
+//   print(a);
+//   final b = await sum(a, 9);
+//   print(b);
+//   final c = await sum(a, b);
+//   print(c);
 
-  try {
-    final a = div('-5', '2');
-    //если в строке 26 появилось Исключение, то остальные команды не выполняются
-    // print(a); не будет выполнено
-    // мы сразу попадаем в блок catch
-    print(a);
-  } on IncorrectIntString catch (error) {
-    // с помощью ключевого слова on можем обрабатывать конкретные исключения
-    print(error);
-  } on DivisionByZero catch (error) {
-    // с помощью ключевого слова on можем обрабатывать конкретные исключения
-    print(error);
-  } catch (error) {
-    // в конце можем добавить catch чтобы отловить неучтенные ситуации
-    print('Неопознанная ошибка $error');
-  } finally {
-    // после ключевого слова finally код выполняется всегда, вне зависимости от исключений
-    // это нужно использовать например для закрытия открытого файла
-    // или для завершения "крутилки" - CircularProgressIndicator
-    print('finally sdfgvsdf');
-  }
+  print('start');
+  example();
+  print('end');
+  // после первого принта, запускается выполнение функции example
+  //поток не задерживается, поток пустой и выполнятся принт print('end');
+  // и когда готов результ работы функции отображается 5 14 19
 }
