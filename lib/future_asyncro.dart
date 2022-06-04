@@ -1,4 +1,6 @@
 //конспект учебного видео Евгения Елчева
+// статья "Работа с асинхронностью в Dart"
+// https://habr.com/ru/company/surfstudio/blog/539362/ 
 
 
 
@@ -55,8 +57,11 @@ void main(List<String> arguments) {
   // print(2);
   // //когда чайник закипит, выведим на печать полученное значение
   // result.then((value) => print(value));
-
 //сначала отработают принты, затем выполнится код result.then((value) => print(value));
+
+
+
+//        некоторые методы
 
 //у класса Future метод then используется часто
 // когда результат будет готов, с ним можно выполнить какое-либо действие
@@ -91,4 +96,120 @@ void main(List<String> arguments) {
     });
   });
 }
+*/
+
+/*
+Future<int> sum(int a, int b) {
+  return Future.sync(() => a + b);
+  // .sync - берет обычную синхронную операцию и возвращает future
+  
+}
+
+Future<void> example() async {
+  final a = await sum(1, 4);
+  print(a);
+  final b = await sum(a, 9);
+  print(b);
+  final c = await sum(a, b);
+  print(c);
+}
+
+void main(List<String> arguments) async {
+  // первый вариант с помощью then
+  /*
+  Работать с Future через обработчики then и catchError — не самая хорошая идея, 
+  особенно если нужно передать результат одного Future во второй, 
+  а второго в третий и т. д., порождая callback hell.
+  https://habr.com/ru/company/surfstudio/blog/539362/
+   */
+  //final a = sum(1, 4);
+  // a.then((a) {
+  //   print(a);
+  //   final b = sum(a, 9);
+  //   b.then((b) {
+  //     print(b);
+  //     final c = sum(a, b);
+  //     c.then((value) => print(value));
+  //   });
+  // });
+
+//второй вариант с помощью async/await
+/*
+при таком подходе мы теряем обработчик catchError, 
+однако никто не мешает нам обрабатывать ошибки через стандартный try/catch.
+статья "Работа с асинхронностью в Dart"
+https://habr.com/ru/company/surfstudio/blog/539362/ 
+*/
+
+  // print('start');
+  // final a = await sum(1, 4);
+  // print(a);
+  // final b = await sum(a, 9);
+  // print(b);
+  // final c = await sum(a, b);
+  // print(c);
+  // print('end');
+
+  /*
+  здесь операции выполняются последовательно (синхронно): т.е.  с помощью слова 
+  await мы ждем выполнение операции и только потом выполнятся последущие операции
+  это необходимо тогда когда нам нужно дождаться результата, чтобы использовать его
+  в последующей операции
+
+  на печать выведится
+start
+5
+14
+19
+end
+
+*/
+        а здесь мы не ждем 
+  // print('start');
+  // example(); без async await поток не ждет выполнения этой операции, а "готовит бутер пока закипает чайник", 
+  // то есть другие нижиследующие операции
+  // print('end');
+  // после первого принта ('start'), запускается выполнение функции example
+  //так как эта функция асинхронная, то поток не задерживается, поток пустой и выполнятся принт print('end');
+  // и когда готов результ работы функции example, отображается 5 14 19
+  start
+  end
+  5
+  14
+  19
+
+}
+*/
+
+
+
+
+/*
+
+void main(List<String> args) async {
+  print('start');
+  final a = await sum(1, 4);
+  print('другие операции');
+  print('другие операции');
+  print('другие операции');
+  print(a);
+  final b = await sum(a, 9);
+  print(b);
+  final c = await sum(a, b);
+  print(c);
+  print('end');
+}
+хотя компилятор ждет результата выполнения, но при этом поток свободный
+и может выполнять другую работу
+
+start
+другие операции
+другие операции
+другие операции
+5
+14
+19
+end
+
+
 */
